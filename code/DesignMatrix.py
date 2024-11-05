@@ -3,22 +3,21 @@ import xarray as xr
 
 
 class DesignMatrix(object):
-    def __init__(self, response_dict):
+    def __init__(self, timestamps, ophys_frame_rate):
         '''
         A toeplitz-matrix builder for running regression with multiple temporal kernels. 
 
         Args
-            response_dict, a dictionary with:
-                timestamps: The actual timestamps for each time bin that will be used in the regression model. 
-                ophys_frame_rate: the number of ophys timestamps per second
+            timestamps: The actual timestamps for each time bin that will be used in the regression model. 
+            ophys_frame_rate: the number of ophys timestamps per second
         '''
 
         # Add some kernels
         self.X = None
         self.kernel_dict = {}
         self.running_stop = 0
-        self.features = {'timestamps':response_dict['timestamps']}
-        self.ophys_frame_rate = response_dict['ophys_frame_rate']
+        self.features = {'timestamps': timestamps}
+        self.ophys_frame_rate = ophys_frame_rate
 
 
     def make_labels(self, label, num_weights,offset, length): 
@@ -119,7 +118,6 @@ class DesignMatrix(object):
         for i in range(kernel_length_samples):
             this_kernel.append(np.roll(features, offset_samples + i))
         this_kernel = np.stack(this_kernel, axis=0)
-        # Alex's toeplitz function
     
         self.kernel_dict[label] = {
             'kernel': this_kernel,
