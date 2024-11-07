@@ -113,12 +113,14 @@ def extract_and_annotate_ophys_plane(bod, run_params, TESTING=False):
     '''
     response = dict()
     response['response_arr'] = process_data(bod, run_params, TESTING=TESTING)
-    response['timestamps'] = response['response_arr']['timestamps'].values
+    response['timestamps'] = [float(round(ts, 4)) for ts in response['response_arr']['timestamps'].values]
     step = np.mean(np.diff(response['timestamps']))
+    step = float(round(step, 4))
     response['time_bins'] = np.concatenate([response['timestamps'],[response['timestamps'][-1]+step]])-step*.5  
     # TODO: better to use previous frame end time and current frame end time. But for now just leave it as-is, 
     # because it's very minor and used for lick counts only.
-    response['ophys_frame_rate'] = bod.ophys_plane_dataset.metadata['ophys_frame_rate']
+    ophys_frame_rate = bod.ophys_plane_dataset.metadata['ophys_frame_rate']
+    response['ophys_frame_rate'] = float(round(ophys_frame_rate, 3))
     
     # Interpolate onto stimulus 
     response, run_params = interpolate_to_stimulus(response, bod, run_params)
@@ -300,6 +302,7 @@ def interpolate_to_stimulus(response, bod, run_params, stimulus_interval=0.75):
     start_times = filtered_stimulus_presentations.start_time.values
     start_times = np.concatenate([start_times, [start_times[-1] + stimulus_interval]]) 
     mean_step = np.mean(np.diff(response['timestamps']))  #TODO: consider using ophys frame rate
+    mean_step = float(round(mean_step, 4))
     # mean_step = 1 / bod.ophys_plane_dataset.metadata['ophys_frame_rate']
     sets_of_stimulus_timestamps = []
     for index, start in enumerate(start_times[0:-1]):
@@ -309,6 +312,7 @@ def interpolate_to_stimulus(response, bod, run_params, stimulus_interval=0.75):
 
     # Combine all the timestamps together
     new_timestamps = np.concatenate(sets_of_stimulus_timestamps)
+    new_timestamps = np.array([float(round(ts, 4)) for ts in new_timestamps])
     new_bins = np.concatenate([new_timestamps, [new_timestamps[-1] + mean_step]]) - mean_step / 2
 
     # Check if it was already interpolated

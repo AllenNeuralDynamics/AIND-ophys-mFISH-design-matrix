@@ -17,8 +17,8 @@ def add_kernels(design, run_params, bod, response):
         bod             COMB behaviorOphysPaneDataset object for this experiment
         response        dictionary about response arrays for this model
     '''
-    run_params['failed_kernels']=set()
-    run_params['failed_dropouts']=set()
+    run_params['failed_kernels'] = set()
+    run_params['failed_dropouts'] = set()
     run_params['kernel_error_dict'] = dict()
     for kernel_name in run_params['kernels']:          
         if 'num_weights' not in run_params['kernels'][kernel_name]:
