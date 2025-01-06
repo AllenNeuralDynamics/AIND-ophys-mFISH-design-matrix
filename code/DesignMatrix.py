@@ -18,6 +18,7 @@ class DesignMatrix(object):
         self.running_stop = 0
         self.features = {'timestamps': timestamps}
         self.ophys_frame_rate = ophys_frame_rate
+        self.unstd_features = {}
 
 
     def make_labels(self, label, num_weights,offset, length): 
@@ -128,4 +129,16 @@ class DesignMatrix(object):
             'ind_start': self.running_stop,
             'ind_stop': self.running_stop+kernel_length_samples
             }
-        self.running_stop += kernel_length_samples 
+        self.running_stop += kernel_length_samples
+ 
+        
+    def add_unstd_features(self, features, label):
+        '''
+        Add unstandardized features to the design matrix. 
+
+        Args:
+            features (np.array): The features to add. 
+            label (string): Name of the features. 
+        '''
+
+        self.unstd_features[label] = features

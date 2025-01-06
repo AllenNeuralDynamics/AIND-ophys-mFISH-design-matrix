@@ -90,6 +90,7 @@ def add_continuous_kernel_by_label(kernel_name, design, run_params, bod, respons
     print('    Adding kernel: '+kernel_name)
     try:
         feature = run_params['kernels'][kernel_name]['feature']
+        unstd_timeseries = None
 
         if feature == 'intercept':
             timeseries = np.ones(len(response['timestamps']))
@@ -101,7 +102,9 @@ def add_continuous_kernel_by_label(kernel_name, design, run_params, bod, respons
             running_df = running_df.rename(columns={'speed':'values'})
             timeseries = interpolate_to_ophys_timestamps(response, running_df)['values'].values
             #timeseries = standardize_inputs(timeseries, mean_center=False,unit_variance=False, max_value=run_params['max_run_speed'])
+            unstd_timeseries = timeseries
             timeseries = standardize_inputs(timeseries)
+            
         # elif feature.startswith('face_motion'):
         #     PC_number = int(feature.split('_')[-1])
         #     face_motion_df =  pd.DataFrame({
@@ -133,6 +136,7 @@ def add_continuous_kernel_by_label(kernel_name, design, run_params, bod, respons
         elif feature == 'pupil':
             ophys_eye = process_eye_data(bod, ophys_timestamps=response['timestamps'])
             timeseries = ophys_eye['pupil_radius_zscore'].values
+            unstd_timeseries = ophys_eyes['pupil_radius'].values
         # elif feature == 'lick_model' or feature == 'groom_model':
         #     if not hasattr(bod, 'lick_groom_model'):
         #         bod.lick_groom_model = process_behavior_predictions(bod, ophys_timestamps = response['timestamps'])
@@ -169,7 +173,9 @@ def add_continuous_kernel_by_label(kernel_name, design, run_params, bod, respons
             kernel_name, 
             offset=run_params['kernels'][kernel_name]['offset'],
             num_weights=run_params['kernels'][kernel_name]['num_weights']
-        )   
+        )
+        if unstd_timeseries is not None:
+            design.add_unstd_features(unstd_timeseries, kernel_name)
         return design
 
 
@@ -244,6 +250,8 @@ def add_discrete_kernel_by_label(kernel_name, design, run_params, bod, response)
     print('    Adding kernel: '+kernel_name)
     try:
         feature = run_params['kernels'][kernel_name]['feature']
+        unstd_timeseries = None
+        
         if feature == 'licks':
             feature_times = bod.licks.data['timestamps'].values
         elif feature == 'lick_bouts':
@@ -279,10 +287,11 @@ def add_discrete_kernel_by_label(kernel_name, design, run_params, bod, response)
             if len(bod.rewards) > 5: 
                 raise Exception('\tPassive Change kernel cant be added to active sessions')               
             feature_times = bod.stimulus_presentations.query('is_change')['start_time'].values
-            feature_times = feature_times[~np.isnan(feature_times)]           
+            feature_times = feature_times[~np.isnan(feature_times)]
         elif feature == 'any-image':
             feature_times = bod.stimulus_presentations.query('not omitted')['start_time'].values
         elif feature == 'image_expectation':
+            stimulus_presentations = bod.stimulus_presentations[~bod.stimulus_presentations.image_name.isna()]
             feature_times = bod.stimulus_presentations['start_time'].values
             # Append last image
             feature_times = np.concatenate([feature_times,[feature_times[-1]+.75]])
@@ -322,7 +331,8 @@ def add_discrete_kernel_by_label(kernel_name, design, run_params, bod, response)
     else:
         features_vec, timestamps = np.histogram(feature_times, bins=response['time_bins'])
     
-        if (feature == 'lick_bouts') or (feature == 'licks'): 
+        if (feature == 'lick_bouts') or (feature == 'licks'):
+            unstd_timeseries = features_vec.copy()
             # Force this to be 0 or 1, since we purposefully over-tiled the space. 
             features_vec[features_vec > 1] = 1
 
@@ -335,7 +345,9 @@ def add_discrete_kernel_by_label(kernel_name, design, run_params, bod, response)
             kernel_name, 
             offset=run_params['kernels'][kernel_name]['offset'],
             num_weights=run_params['kernels'][kernel_name]['num_weights']
-        )   
+        )
+        if unstd_timeseries is not None:
+            design.add_unstd_features(unstd_timeseries, kernel_name)
 
         return design
 

@@ -195,7 +195,7 @@ def get_ophys_frames_to_use(bod, end_buffer=0.5, stim_dur=0.25):
         Boolean mask with which ophys frames to use
     '''
     # filter out omitted flashes to avoid omitted flashes at the start of the session from affecting analysis range
-    filtered_stimulus_presentations = bod.stimulus_presentations
+    filtered_stimulus_presentations = bod.stimulus_presentations[~bod.stimulus_presentations.image_name.isna()]
     while filtered_stimulus_presentations.iloc[0]['omitted'] == True:
         filtered_stimulus_presentations = filtered_stimulus_presentations.iloc[1:]
     ophys_timestamps = bod.ophys_timestamps.values
@@ -294,7 +294,7 @@ def interpolate_to_stimulus(response, bod, run_params, stimulus_interval=0.75):
     print('Interpolating neural signal onto stimulus aligned timestamps')
  
     # Find first non omitted stimulus and remove it (because it cannot be distinguished from initial gray screen period)
-    filtered_stimulus_presentations = bod.stimulus_presentations
+    filtered_stimulus_presentations = bod.stimulus_presentations[~bod.stimulus_presentations.image_name.isna()]
     while filtered_stimulus_presentations.iloc[0]['omitted'] == True:
         filtered_stimulus_presentations = filtered_stimulus_presentations.iloc[1:]
 
