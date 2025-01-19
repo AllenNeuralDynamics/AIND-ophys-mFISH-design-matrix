@@ -34,7 +34,7 @@ RUN pip install -U --no-cache-dir \
     codeocean \
     sparse \
     aind-session \
-#    tables
+    tables
 
 RUN git clone https://github.com/AllenNeuralDynamics/aind-codeocean-api \
     && cd aind-codeocean-api \
