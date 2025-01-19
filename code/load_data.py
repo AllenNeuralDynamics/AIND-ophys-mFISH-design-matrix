@@ -41,7 +41,7 @@ def load_plane_data(session_name, opid=None, opid_ind=None, data_dir='/root/caps
     else:
         plane_dirs = []
         for path in glob.glob(processed_dirs[0] + '/*'):
-            if os.path.isdir(path) and path.split('/')[-1].isnumeric():
+            if os.path.isdir(path) and ('nwb' not in path.split('/')[-1]):
                 plane_dirs.append(path)
 
         if opid is not None:
@@ -64,7 +64,8 @@ def load_plane_data(session_name, opid=None, opid_ind=None, data_dir='/root/caps
     if not raw_path.exists():
         raise ValueError(f'No raw data found for session {session_name}')
     bod = BehaviorOphysDataset(plane_folder_path=plane_path,
-                               raw_folder_path=raw_path)    
+                               raw_folder_path=raw_path,
+                               pipeline_version='v6')    
     bod.metadata['ophys_plane_id'] = opid
     return bod
 

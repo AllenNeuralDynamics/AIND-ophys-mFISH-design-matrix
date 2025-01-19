@@ -17,7 +17,7 @@ RUN apt install fonts-lato fonts-open-sans fonts-roboto fonts-mononoki -y
 
 RUN pip install -U --no-cache-dir \
     matplotlib \
-    numpy \
+    numpy==1.26.4 \
     seaborn \
     scipy \
     pytest \
@@ -30,7 +30,11 @@ RUN pip install -U --no-cache-dir \
     aind-data-access-api \
     aind-ophys-utils \
     pymongo \
-    scikit-learn
+    scikit-learn \
+    codeocean \
+    sparse \
+    aind-session \
+#    tables
 
 RUN git clone https://github.com/AllenNeuralDynamics/aind-codeocean-api \
     && cd aind-codeocean-api \
