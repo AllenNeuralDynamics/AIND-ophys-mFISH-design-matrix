@@ -1,5 +1,5 @@
 metadata_version: 1
-name: ophys-mFISH-design-matrix
+name: AIND-ophys-mFISH-design-matrix
 description: Basic structure of a capsule to be customized as needed.
 authors:
 - name: AIND

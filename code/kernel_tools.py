@@ -52,13 +52,15 @@ def replace_kernels(kernels, bod):
         raise Exception('Including both each-image and any-image kernels makes the model unstable')
     if 'each-image' in kernels:
         specs = kernels.pop('each-image')
-        image_names = np.setdiff1d(bod.stimulus_presentations['image_name'].unique(), 'omitted')
+        stimulus_presentations = bod.stimulus_presentations[~bod.stimulus_presentations.image_name.isna()]
+        image_names = np.setdiff1d(stimulus_presentations['image_name'].unique(), 'omitted')
         for index, val in enumerate(image_names):
             kernels[val] = copy(specs)
             kernels[val]['feature'] = val
     if 'each-image_change' in kernels:
         specs = kernels.pop('each-image_change')
-        image_names = np.sort(bod.stimulus_presentations['image_name'].unique())
+        stimulus_presentations = bod.stimulus_presentations[~bod.stimulus_presentations.image_name.isna()]
+        image_names = np.sort(stimulus_presentations['image_name'].unique())
         for index, val in enumerate(image_names):
             kernels[val] = copy(specs)
             kernels[val]['feature'] = val
